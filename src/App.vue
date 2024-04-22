@@ -1,7 +1,7 @@
 <script setup>
 // Import the functions you need from the SDKs you need
 import { ref, onMounted } from 'vue'
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebaseConfig.js';
 
 // Define reactive data
@@ -24,14 +24,24 @@ const fetchTodos = async () => {
 const addTodo = async () => {
   try {
     await addDoc(collection(db, 'todos'), newTodo.value);
-    newTodo.value = { name: '', age: 0 }; // Clear input fields after adding todo
-    // Optionally, you can fetch todos again to update the list immediately
+    newTodo.value = { name: '', age: 0 };
     fetchTodos();
+    alert('Todo added successfully!');
   } catch (error) {
     console.error('Error adding todo:', error);
   }
 };
-// Call fetchTodos function to fetch todos when the component is mounted
+
+const deleteTodo = async (todo) => {
+  try {
+    await deleteDoc(doc(db, 'todos', todo.id));
+    fetchTodos();
+    alert('Todo deleted successfully!');
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+  }
+}
+
 onMounted(fetchTodos) 
 </script>
 
@@ -45,6 +55,7 @@ onMounted(fetchTodos)
       <ul>
         <li v-for="todo in todos" :key="todo.id">
           {{ todo.name }} - {{ todo.age }}
+          <button @click="deleteTodo(todo)">Delete Todo</button>
         </li>
       </ul>
     </div>
